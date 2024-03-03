@@ -46,7 +46,12 @@ jobs:
         pytest ./dl-segmentation
     - name: Run main.py
       run: |
-	cd ./dl-segmentation/src/dl_segmentation
+	ls -a
+	cd ./dl-segmentation/
+	ls -a
+	cd ./src
+	ls -a
+	cd ./dl_segmentation
         python -m model.main.py
 	cd ../../..
 
