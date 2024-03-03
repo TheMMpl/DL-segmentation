@@ -6,4 +6,4 @@ random.seed(MODEL_SEED)
 from dl_segmentation.model.random_seed_test import print_random_ints
 
 print_random_ints(10)
-print(randint(1,100))
+print(random.randint(1,100))
