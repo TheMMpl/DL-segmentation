@@ -47,6 +47,6 @@ jobs:
     - name: Run main.py
       run: |
         cd ./dl-segmentation/src/
-        python -m model.main
+        python -m dl_segmentation.model.main
         cd ../..
 
