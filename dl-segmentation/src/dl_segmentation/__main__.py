@@ -1,4 +1,4 @@
-"""DL-segmentation file for ensuring the package is executable
+"""dl-segmentation file for ensuring the package is executable
 as `dl-segmentation` and `python -m dl_segmentation`
 """
 import importlib

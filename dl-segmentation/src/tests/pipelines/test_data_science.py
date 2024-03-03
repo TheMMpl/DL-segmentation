@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from pipelines.data_science.nodes import split_data
+from dl_segmentation.pipelines.data_science.nodes import split_data
 
 
 @pytest.fixture
