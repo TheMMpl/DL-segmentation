@@ -16,4 +16,5 @@ fastparquet
 openpyxl
 numpy
 torch
-
+pytorch_lightning
+wandb
