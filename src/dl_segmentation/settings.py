@@ -13,6 +13,10 @@ https://docs.kedro.org/en/stable/kedro_project_setup/settings.html."""
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
 
 # Class that manages storing KedroSession data.
+from dl_segmentation.hooks.seed_hooks import SettingSeedHooks
+
+HOOKS = (SettingSeedHooks(),)
+
 from pathlib import Path  # noqa: E402
 
 from kedro_viz.integrations.kedro.sqlite_store import SQLiteStore  # noqa: E402
