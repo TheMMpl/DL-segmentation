@@ -26,11 +26,11 @@ class ResUnet(nn.Module):
         self.layer2=ResConv(128,256,stride=2)
         self.bridge=ResConv(256,512,stride=2,residual=False)
         self.up1=nn.Upsample(scale_factor=2,mode="bilinear",align_corners=True)
-        self.layer4=ResConv(512,256,stride=1)
+        self.layer4=ResConv(512,256,stride=1,skip=True)
         self.up2=nn.Upsample(scale_factor=2,mode="bilinear",align_corners=True)
-        self.layer5=ResConv(256,128,stride=1)
+        self.layer5=ResConv(256,128,stride=1,skip=True)
         self.up3=nn.Upsample(scale_factor=2,mode="bilinear",align_corners=True)
-        self.layer6=ResConv(128,64,stride=1)
+        self.layer6=ResConv(128,64,stride=1,skip=True)
         self.unmask=nn.Sequential(
             nn.Conv2d(64,num_classes,kernel_size=1,stride=1),
             nn.Softmax2d()
@@ -46,25 +46,36 @@ class ResUnet(nn.Module):
         skip3=self.layer2(skip2)
         x=self.bridge(skip3)
         x=self.up1(x)
-        x=self.layer4(x,skip1)
-        x=self.layer5(x,skip2)
-        x=self.layer6(x,skip3)
+        print(x.shape)
+        print(skip3.shape)
+        x = torch.cat([x, skip3], dim=1)
+        x=self.layer4(x)
+        x=self.up2(x)
+        x = torch.cat([x, skip2], dim=1)
+        x=self.layer5(x)
+        x=self.up3(x)
+        x = torch.cat([x, skip1], dim=1)
+        x=self.layer6(x)
         return self.unmask(x)
 
 class ResConv(nn.Module):
-    def __init__(self, channels_in, channels_out, stride,residual=True):
+    def __init__(self, channels_in, channels_out, stride,residual=True,skip=False):
         super().__init__()
         self.residual=residual
         #we downsample once per block
+        if skip:
+            skip_channels=channels_out
+        else:
+            skip_channels=0
         self.conv_unit=nn.Sequential(
-            nn.BatchNorm2d(channels_in),
+            nn.BatchNorm2d(channels_in+skip_channels),
             nn.GELU(),
-            nn.Conv2d(channels_in,channels_out,kernel_size=3,stride=stride,padding=1),
+            nn.Conv2d(channels_in+skip_channels,channels_out,kernel_size=3,stride=stride,padding=1),
             nn.BatchNorm2d(channels_out),
             nn.GELU(),
             nn.Conv2d(channels_out,channels_out,kernel_size=3,stride=1,padding=1),
         )
-        self.skip_conv=nn.Conv2d(channels_in,channels_out,kernel_size=1,padding=0,stride=stride)
+        self.skip_conv=nn.Conv2d(channels_in+skip_channels,channels_out,kernel_size=1,padding=0,stride=stride)
 
     def forward(self,x):
         if self.residual:
@@ -90,3 +101,15 @@ class LightningModel(L.LightningModule):
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
+    
+# unet=LightningModel(20)
+# print(unet.parameters())
+# testmod=ResUnet(20)
+# print(testmod.parameters())
+# testmod.eval()
+# img=read_image("testpic.jpeg")
+# #img= read_image("istockphoto-1279831403-612x612.jpg")
+# preprocess = weights.transforms()
+# batch = preprocess(img).unsqueeze(0)
+# r=testmod(batch)
+# print("ziu")
