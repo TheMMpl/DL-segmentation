@@ -8,6 +8,7 @@ from torchvision.transforms.functional import to_pil_image
 from torchvision.io.image import read_image
 from torch import optim
 import torch.nn.functional as F
+import wandb
 
 weights=DeepLabV3_ResNet50_Weights.DEFAULT
 model=deeplabv3_resnet50(weights=weights)
@@ -62,6 +63,7 @@ class ResConv(nn.Module):
     def __init__(self, channels_in, channels_out, stride,residual=True,skip=False):
         super().__init__()
         self.residual=residual
+        
         #we downsample once per block
         if skip:
             skip_channels=channels_out
@@ -87,16 +89,27 @@ class LightningModel(L.LightningModule):
     def __init__(self, num_classes,):
         super().__init__()
         self.unet=ResUnet(num_classes)
+        self.lossfunc=nn.CrossEntropyLoss()
 
     def training_step(self, batch, batch_idx):
         #assumption for now
         x,y=batch
         x=self.unet(x)
-        lossfunc=nn.CrossEntropyLoss()
-        loss=lossfunc(x,y)
+        loss=self.lossfunc(x,y)
         self.log("train_loss", loss)
         return loss
 
+    def validation_step(self, batch, batch_idx):
+        x,y=batch
+        pred=self.unet(x)
+        loss=self.lossfunc(x,y)
+        self.log("val_loss", loss)
+        return pred
+    
+    def predict_step(self, batch, batch_idx):
+        x, y = batch
+        pred = self.encoder(x)
+        return pred
     
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=1e-3)
@@ -107,7 +120,7 @@ class LightningModel(L.LightningModule):
 # testmod=ResUnet(20)
 # print(testmod.parameters())
 # testmod.eval()
-# img=read_image("testpic.jpeg")
+# img=read_image("testimg.jpg")
 # #img= read_image("istockphoto-1279831403-612x612.jpg")
 # preprocess = weights.transforms()
 # batch = preprocess(img).unsqueeze(0)
