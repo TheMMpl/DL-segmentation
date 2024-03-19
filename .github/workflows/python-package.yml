@@ -23,7 +23,6 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
-        WANDB_KEY: ${{ secrets.WANDB_API_KEY }}
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
     - name: Install dependencies
@@ -39,7 +38,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Run project
       run: |
-        wandb login WANDB_KEY
+        wandb login ${{ secrets.WANDB_API_KEY }}
         kedro run
     - name: Test with pytest
       run: |
