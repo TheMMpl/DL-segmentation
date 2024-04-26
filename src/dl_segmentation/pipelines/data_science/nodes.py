@@ -1,10 +1,20 @@
 import logging
 from typing import Dict, Tuple
+import os
 
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import max_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
+import pytorch_lightning as L
+from dl_segmentation.model.model import LightningModel
+from torchvision.datasets import Cityscapes
+from torch.utils.data import DataLoader
+from lightning.pytorch.loggers import WandbLogger
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import ModelCheckpoint
+from torchvision import transforms
+from dl_segmentation.pipelines.train import CityScapesTransform
 
 
 def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
@@ -24,19 +34,23 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
     return X_train, X_test, y_train, y_test
 
 
-def train_model(X_train: pd.DataFrame, y_train: pd.Series) -> LinearRegression:
-    """Trains the linear regression model.
+def train_model():
+    BATCH_SIZE = 32
+    MAX_EPOCHS = 20
+    NUM_WORKERS = 7
+    LOG_STEPS = 5
+    unet=LightningModel(20)
 
-    Args:
-        X_train: Training data of independent features.
-        y_train: Training data for price.
+    wandb_logger = WandbLogger(project="DL_segmenation",log_model="all")
+    checkpoint_callback = ModelCheckpoint(monitor="val_loss",save_top_k=10,every_n_epochs=1)
+    trainer = Trainer(logger=wandb_logger,callbacks=[checkpoint_callback],max_epochs=MAX_EPOCHS,log_every_n_steps=LOG_STEPS)
+    train_dataset = Cityscapes('./dataset/cityscapes', split='train', mode='fine',
+                     target_type='semantic', transforms = CityScapesTransform())
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
+    trainer.fit(model=unet,train_dataloaders=train_loader)
 
-    Returns:
-        Trained model.
-    """
-    regressor = LinearRegression()
-    regressor.fit(X_train, y_train)
-    return regressor
+
+    return unet
 
 
 def evaluate_model(

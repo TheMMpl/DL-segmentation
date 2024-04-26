@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import wandb
 
 weights=DeepLabV3_ResNet50_Weights.DEFAULT
-model=deeplabv3_resnet50(weights=weights)
+#model=deeplabv3_resnet50(weights=weights)
 
 class ResUnet(nn.Module):
     def __init__(self, num_classes):
@@ -36,7 +36,6 @@ class ResUnet(nn.Module):
             nn.Conv2d(64,num_classes,kernel_size=1,stride=1),
             nn.Softmax2d()
         )
-
         #czemu 1x1 conv- żeby dopasować ilość kanałów - bo robimy res connection ale z inchannenl trzeba zrobić outchannels
         #jakie loss function?- chyba cross entropy - czy log nie wiem
 
@@ -47,8 +46,6 @@ class ResUnet(nn.Module):
         skip3=self.layer2(skip2)
         x=self.bridge(skip3)
         x=self.up1(x)
-        print(x.shape)
-        print(skip3.shape)
         x = torch.cat([x, skip3], dim=1)
         x=self.layer4(x)
         x=self.up2(x)
@@ -95,6 +92,8 @@ class LightningModel(L.LightningModule):
         #assumption for now
         x,y=batch
         x=self.unet(x)
+        y = y.squeeze_()
+        y = y.long()
         loss=self.lossfunc(x,y)
         self.log("train_loss", loss)
         return loss

@@ -1,23 +1,25 @@
-from model.model import model
 import pytorch_lightning as L
-from model.model import LightningModel
+from dl_segmentation.model.model import LightningModel
 from torchvision.datasets import Cityscapes
 from torch.utils.data import DataLoader
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch import Trainer
 from lightning.pytorch.callbacks import ModelCheckpoint
+from torchvision import transforms
+from torchvision.transforms import v2
+import torch
 
-unet=LightningModel(20)
+class CityScapesTransform:
+    def __call__(self, image, target):
+        trans = [transforms.PILToTensor(), transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,128))]
+        for t in trans:
+            image = t(image)
+            target = t(target)
+        return image, target
 
-wandb_logger=WandbLogger(project="DL_segmenation",log_model="all")
-checkpoint_callback=ModelCheckpoint(monitor="val_loss",save_top_k=10,every_n_epochs=1)
-trainer=Trainer(logger=wandb_logger,callbacks=[checkpoint_callback])
 
-#to complete with correct dataloader
-train_loader=DataLoader(Cityscapes)
 
-trainer.fit(model=unet,train_dataloaders=train_loader)
-
+# To wszystko co tu było jest w data_science.nodes.py
 
 #some loading code for later
 
