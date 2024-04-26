@@ -43,7 +43,7 @@ def train_model():
 
     wandb_logger = WandbLogger(project="DL_segmenation",log_model="all")
     checkpoint_callback = ModelCheckpoint(monitor="val_loss",save_top_k=10,every_n_epochs=1)
-    trainer = Trainer(logger=wandb_logger,callbacks=[checkpoint_callback],max_epochs=MAX_EPOCHS,log_every_n_steps=LOG_STEPS)
+    trainer = Trainer(accelerator="auto",logger=wandb_logger,callbacks=[checkpoint_callback],max_epochs=MAX_EPOCHS,log_every_n_steps=LOG_STEPS)
     train_dataset = Cityscapes('./dataset/cityscapes', split='train', mode='fine',
                      target_type='semantic', transforms = CityScapesTransform())
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
