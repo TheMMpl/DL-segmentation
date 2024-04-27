@@ -112,6 +112,8 @@ class LightningModel(L.LightningModule):
         optimizer = optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
     
+    def forward(self, batch):
+        return self.unet.forward(batch)
 # unet=LightningModel(20)
 # print(unet.parameters())
 # testmod=ResUnet(20)
