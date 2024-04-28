@@ -90,8 +90,7 @@ class LightningModel(L.LightningModule):
         x,y=batch
         x=self.unet(x)
         #print(f'przed squeeze: {y}')
-        y = y.squeeze_()
-        y = y.long()
+        y.squeeze_()
         #print(f'po squeeze: {y}')
         loss=self.lossfunc(x,y)
         self.log("train_loss", loss)
@@ -101,7 +100,8 @@ class LightningModel(L.LightningModule):
     def validation_step(self, batch, batch_idx):
         x,y=batch
         pred=self.unet(x)
-        loss=self.lossfunc(x,y)
+        y.squeeze_()
+        loss=self.lossfunc(pred,y)
         self.log("val_loss", loss)
         return pred
     

@@ -39,9 +39,9 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
 
 
 def train_model():
-    BATCH_SIZE = 32
+    BATCH_SIZE = 8
     MAX_EPOCHS = 5
-    NUM_WORKERS = 10
+    NUM_WORKERS = 8
     LOG_STEPS = 5
     NUM_CLASSES = 34
     
@@ -53,7 +53,11 @@ def train_model():
     train_dataset = Cityscapes('./dataset/cityscapes', split='train',
                      target_type='semantic', transforms = CityScapesTransform())
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
-    trainer.fit(model=unet,train_dataloaders=train_loader)
+    trainer = Trainer(logger=wandb_logger,callbacks=[checkpoint_callback],max_epochs=MAX_EPOCHS,log_every_n_steps=LOG_STEPS)
+    val_dataset = Cityscapes('./dataset/cityscapes', split='val',
+                     target_type='semantic', transforms = CityScapesTransform())
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
+    trainer.fit(unet,train_loader,val_loader)
     
     unet.eval()
     unet.unet.eval()
