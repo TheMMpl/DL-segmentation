@@ -86,15 +86,11 @@ class LightningModel(L.LightningModule):
         self.lossfunc=nn.CrossEntropyLoss()
 
     def training_step(self, batch, batch_idx):
-        #assumption for now
         x,y=batch
         x=self.unet(x)
-        #print(f'przed squeeze: {y}')
         y.squeeze_()
-        #print(f'po squeeze: {y}')
         loss=self.lossfunc(x,y)
         self.log("train_loss", loss)
-        #print(loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -103,7 +99,7 @@ class LightningModel(L.LightningModule):
         y.squeeze_()
         loss=self.lossfunc(pred,y)
         self.log("val_loss", loss)
-        return pred
+        return loss
     
     def predict_step(self, batch, batch_idx):
         x, y = batch
@@ -117,14 +113,11 @@ class LightningModel(L.LightningModule):
     def forward(self, x):
         return self.unet.forward(x)
     
-# unet=LightningModel(20)
-# print(unet.parameters())
-# testmod=ResUnet(20)
-# print(testmod.parameters())
-# testmod.eval()
-# img=read_image("testimg.jpg")
-# #img= read_image("istockphoto-1279831403-612x612.jpg")
-# preprocess = weights.transforms()
-# batch = preprocess(img).unsqueeze(0)
-# r=testmod(batch)
-# print("ziu")
+    def test_step(self, batch, batch_idx):
+        x,y = batch
+        pred = self.unet(x)
+        y.squeeze_()
+        loss=self.lossfunc(pred,y)
+        self.log("test_loss", loss)
+        return loss
+

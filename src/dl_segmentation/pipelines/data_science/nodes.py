@@ -20,6 +20,11 @@ from torchvision.transforms import v2
 import torch
 from matplotlib import pyplot as plt
 
+BATCH_SIZE = 8
+MAX_EPOCHS = 5
+NUM_WORKERS = 8
+LOG_STEPS = 5
+NUM_CLASSES = 34
 
 def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
     """Splits data into features and targets training and test sets.
@@ -39,12 +44,6 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
 
 
 def train_model():
-    BATCH_SIZE = 8
-    MAX_EPOCHS = 5
-    NUM_WORKERS = 8
-    LOG_STEPS = 5
-    NUM_CLASSES = 34
-    
     unet=LightningModel(NUM_CLASSES)
     
     wandb_logger = WandbLogger(project="DL_segmenation",log_model="all")
@@ -59,55 +58,13 @@ def train_model():
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
     trainer.fit(unet,train_loader,val_loader)
     
-    unet.eval()
-    unet.unet.eval()
-    img, tar = train_dataset[7]
-    trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,256))]
-    for t in trans:
-        img = t(img)
-    img.unsqueeze_(0)
-    tar2 = unet(img)[0].detach().numpy()
-    print(tar2.shape)
-    print(tar2[0].shape)
-    result1=torch.argmax(unet(img)[0],dim=0).detach().numpy()
-    plt.imshow(tar[0])
-    plt.show()
-    plt.imshow(tar2[0])
-    plt.show()
-    plt.imshow(result1)
-    plt.show()
-    img, tar = train_dataset[14]
-    trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,256))]
-    for t in trans:
-        img = t(img)
-    img.unsqueeze_(0)
-    tar2 = unet(img)[0].detach().numpy()
-    plt.imshow(tar[0])
-    plt.show()
-    result2=torch.argmax(unet(img)[0],dim=0).detach().numpy()
-    plt.imshow(result2)
-    plt.show()
-    plt.imshow(tar2[0])
-    plt.show()
+    return unet, trainer
 
 
-    return unet
-
-
-def evaluate_model(
-    regressor: LinearRegression, X_test: pd.DataFrame, y_test: pd.Series
-) -> Dict[str, float]:
-    """Calculates and logs the coefficient of determination.
-
-    Args:
-        regressor: Trained model.
-        X_test: Testing data of independent features.
-        y_test: Testing data for price.
-    """
-    y_pred = regressor.predict(X_test)
-    score = r2_score(y_test, y_pred)
-    mae = mean_absolute_error(y_test, y_pred)
-    me = max_error(y_test, y_pred)
-    logger = logging.getLogger(__name__)
-    logger.info("Model has a coefficient R^2 of %.3f on test data.", score)
-    return {"r2_score": score, "mae": mae, "max_error": me}
+def test_model(unet, trainer):
+    test_dataset = Cityscapes('./dataset/cityscapes', split='test',
+                     target_type='semantic', transforms = CityScapesTransform())
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
+    trainer.test(model=unet,dataloaders=test_loader)
+    
+    return {"A":0.}
