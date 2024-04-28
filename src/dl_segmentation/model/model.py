@@ -10,8 +10,6 @@ from torch import optim
 import torch.nn.functional as F
 import wandb
 
-weights=DeepLabV3_ResNet50_Weights.DEFAULT
-#model=deeplabv3_resnet50(weights=weights)
 
 class ResUnet(nn.Module):
     def __init__(self, num_classes):
@@ -99,7 +97,7 @@ class LightningModel(L.LightningModule):
         y.squeeze_()
         loss=self.lossfunc(pred,y)
         self.log("val_loss", loss)
-        return loss
+        #return loss
     
     def predict_step(self, batch, batch_idx):
         x, y = batch

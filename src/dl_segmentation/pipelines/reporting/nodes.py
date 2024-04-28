@@ -28,7 +28,8 @@ def check_model_inference(preprocessed_shuttles: pd.DataFrame):
     model.eval()
     model.unet.eval()
     val_dataset = Cityscapes('./dataset/cityscapes', split='val',target_type='semantic', transforms = CityScapesTransform())
-    #val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False,pin_memory=True)
+    train_dataset = Cityscapes('./dataset/cityscapes', split='train',
+                     target_type='semantic', transforms = CityScapesTransform())
     #necessarry because we don't use the trainer here
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,256))]
@@ -48,6 +49,18 @@ def check_model_inference(preprocessed_shuttles: pd.DataFrame):
         # plt.imshow(result)
         # plt.show()
         plt.imsave(f'demo_results/res{jank_iter}.jpg',result)
+
+    jank_iter=0
+    for img,target in train_dataset:
+        jank_iter+=1
+        for t in trans:
+            img=t(img)
+        image=img.to(device)
+        image.unsqueeze_(0)
+        result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
+        plt.imsave(f'demo_results/train_res{jank_iter}.jpg',result)    
+        if jank_iter>500:
+            break
         
     return (
         preprocessed_shuttles.groupby(["shuttle_type"])

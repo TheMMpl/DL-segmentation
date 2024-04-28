@@ -20,8 +20,8 @@ from torchvision.transforms import v2
 import torch
 from matplotlib import pyplot as plt
 
-BATCH_SIZE = 8
-MAX_EPOCHS = 5
+BATCH_SIZE = 16
+MAX_EPOCHS = 100
 NUM_WORKERS = 8
 LOG_STEPS = 5
 NUM_CLASSES = 34
@@ -48,7 +48,8 @@ def train_model():
     
     wandb_logger = WandbLogger(project="DL_segmenation",log_model="all")
     checkpoint_callback = ModelCheckpoint(monitor="val_loss",save_top_k=10,every_n_epochs=1)
-    trainer = Trainer(logger=wandb_logger,callbacks=[checkpoint_callback],max_epochs=MAX_EPOCHS,log_every_n_steps=LOG_STEPS)
+    test_callback = ModelCheckpoint(monitor="train_loss",save_top_k=5,every_n_epochs=1)
+    trainer = Trainer(logger=wandb_logger,callbacks=[checkpoint_callback,test_callback],max_epochs=MAX_EPOCHS,log_every_n_steps=LOG_STEPS)
     train_dataset = Cityscapes('./dataset/cityscapes', split='train',
                      target_type='semantic', transforms = CityScapesTransform())
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
