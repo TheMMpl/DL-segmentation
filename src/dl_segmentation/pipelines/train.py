@@ -11,9 +11,11 @@ import torch
 
 class CityScapesTransform:
     def __call__(self, image, target):
-        trans = [transforms.PILToTensor(), transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,128))]
-        for t in trans:
+        trans_im = [transforms.PILToTensor(), transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,256))]
+        trans_tar = [transforms.PILToTensor(), transforms.v2.ToDtype(torch.long, scale=False), transforms.v2.Resize((128,256),interpolation=transforms.InterpolationMode.NEAREST)]
+        for t in trans_im:
             image = t(image)
+        for t in trans_tar:
             target = t(target)
         return image, target
 

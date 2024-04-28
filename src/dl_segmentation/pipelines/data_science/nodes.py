@@ -15,6 +15,10 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torchvision import transforms
 from dl_segmentation.pipelines.train import CityScapesTransform
+from torchvision import transforms
+from torchvision.transforms import v2
+import torch
+from matplotlib import pyplot as plt
 
 
 def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
@@ -35,19 +39,43 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
 
 
 def train_model():
-    BATCH_SIZE = 32
-    MAX_EPOCHS = 20
-    NUM_WORKERS = 7
+    BATCH_SIZE = 8
+    MAX_EPOCHS = 1
+    NUM_WORKERS = 10
     LOG_STEPS = 5
-    unet=LightningModel(20)
-
+    NUM_CLASSES = 34
+    
+    unet=LightningModel(NUM_CLASSES)
+    
     wandb_logger = WandbLogger(project="DL_segmenation",log_model="all")
     checkpoint_callback = ModelCheckpoint(monitor="val_loss",save_top_k=10,every_n_epochs=1)
     trainer = Trainer(logger=wandb_logger,callbacks=[checkpoint_callback],max_epochs=MAX_EPOCHS,log_every_n_steps=LOG_STEPS)
-    train_dataset = Cityscapes('./dataset/cityscapes', split='train', mode='fine',
+    train_dataset = Cityscapes('./dataset/cityscapes', split='train',
                      target_type='semantic', transforms = CityScapesTransform())
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
     trainer.fit(model=unet,train_dataloaders=train_loader)
+    
+    
+    img, tar = train_dataset[7]
+    trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,256))]
+    for t in trans:
+        img = t(img)
+    img.unsqueeze_(0)
+    tar2 = unet(img)[0].detach().numpy()
+    plt.imshow(tar[0])
+    plt.show()
+    plt.imshow(tar2[0])
+    plt.show()
+    img, tar = train_dataset[14]
+    trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,256))]
+    for t in trans:
+        img = t(img)
+    img.unsqueeze_(0)
+    tar2 = unet(img)[0].detach().numpy()
+    plt.imshow(tar[0])
+    plt.show()
+    plt.imshow(tar2[0])
+    plt.show()
 
 
     return unet

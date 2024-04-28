@@ -96,6 +96,7 @@ class LightningModel(L.LightningModule):
         y = y.long()
         loss=self.lossfunc(x,y)
         self.log("train_loss", loss)
+        print(loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -113,6 +114,9 @@ class LightningModel(L.LightningModule):
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
+    
+    def forward(self, x):
+        return self.unet.forward(x)
     
 # unet=LightningModel(20)
 # print(unet.parameters())
