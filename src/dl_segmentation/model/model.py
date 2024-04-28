@@ -34,11 +34,8 @@ class ResUnet(nn.Module):
         self.layer6=ResConv(128,64,stride=1,skip=True)
         self.unmask=nn.Sequential(
             nn.Conv2d(64,num_classes,kernel_size=1,stride=1),
-            nn.Softmax2d()
         )
         #czemu 1x1 conv- żeby dopasować ilość kanałów - bo robimy res connection ale z inchannenl trzeba zrobić outchannels
-        #jakie loss function?- chyba cross entropy - czy log nie wiem
-
     
     def forward(self,x):
         skip1=self.layer0(x)+self.sconv(x)
@@ -92,11 +89,13 @@ class LightningModel(L.LightningModule):
         #assumption for now
         x,y=batch
         x=self.unet(x)
+        #print(f'przed squeeze: {y}')
         y = y.squeeze_()
         y = y.long()
+        #print(f'po squeeze: {y}')
         loss=self.lossfunc(x,y)
         self.log("train_loss", loss)
-        print(loss)
+        #print(loss)
         return loss
 
     def validation_step(self, batch, batch_idx):

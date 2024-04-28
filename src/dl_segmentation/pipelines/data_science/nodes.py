@@ -39,8 +39,8 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
 
 
 def train_model():
-    BATCH_SIZE = 8
-    MAX_EPOCHS = 1
+    BATCH_SIZE = 32
+    MAX_EPOCHS = 5
     NUM_WORKERS = 10
     LOG_STEPS = 5
     NUM_CLASSES = 34
@@ -55,16 +55,22 @@ def train_model():
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS)
     trainer.fit(model=unet,train_dataloaders=train_loader)
     
-    
+    unet.eval()
+    unet.unet.eval()
     img, tar = train_dataset[7]
     trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,256))]
     for t in trans:
         img = t(img)
     img.unsqueeze_(0)
     tar2 = unet(img)[0].detach().numpy()
+    print(tar2.shape)
+    print(tar2[0].shape)
+    result1=torch.argmax(unet(img)[0],dim=0).detach().numpy()
     plt.imshow(tar[0])
     plt.show()
     plt.imshow(tar2[0])
+    plt.show()
+    plt.imshow(result1)
     plt.show()
     img, tar = train_dataset[14]
     trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,256))]
@@ -73,6 +79,9 @@ def train_model():
     img.unsqueeze_(0)
     tar2 = unet(img)[0].detach().numpy()
     plt.imshow(tar[0])
+    plt.show()
+    result2=torch.argmax(unet(img)[0],dim=0).detach().numpy()
+    plt.imshow(result2)
     plt.show()
     plt.imshow(tar2[0])
     plt.show()
