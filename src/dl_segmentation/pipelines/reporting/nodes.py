@@ -11,13 +11,16 @@ from torchvision import transforms
 import torch
 from pathlib import Path
 from torch.utils.data import DataLoader
+import numpy as np
 
 # This function uses plotly.express
 def check_model_inference(preprocessed_shuttles: pd.DataFrame):
     # reference can be retrieved in artifacts panel
     # "VERSION" can be a version (ex: "v2") or an alias ("latest or "best")
-    checkpoint_reference = "dlprojekt/DL_segmenation/model-jql8pobq:v20"
-    model_name="model-jql8pobq:v20"
+    #checkpoint_reference = "dlprojekt/DL_segmenation/model-jql8pobq:v20"
+    #checkpoint_reference='dlprojekt/DL_segmenation/model-6cwa5z66:v92'
+    checkpoint_reference='dlprojekt/DL_segmenation/model-6cwa5z66:v26'
+    #model_name="model-jql8pobq:v20"
     # download checkpoint locally (if not already cached)
     run = wandb.init(project="DL_segmenation")
     artifact = run.use_artifact(checkpoint_reference, type="model")
@@ -48,7 +51,9 @@ def check_model_inference(preprocessed_shuttles: pd.DataFrame):
         result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
         # plt.imshow(result)
         # plt.show()
-        plt.imsave(f'demo_results/res{jank_iter}.jpg',result)
+        comparison=np.vstack([result,target[0]])
+        plt.imsave(f'demo_results/overfit_test2/res{jank_iter}.jpg',comparison)
+        #plt.imsave(f'demo_results/overfit_test2/img{jank_iter}.jpg',torch.permute(img,(1,2,0)).numpy()/255)
 
     jank_iter=0
     for img,target in train_dataset:
@@ -58,10 +63,12 @@ def check_model_inference(preprocessed_shuttles: pd.DataFrame):
         image=img.to(device)
         image.unsqueeze_(0)
         result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
-        plt.imsave(f'demo_results/train_res{jank_iter}.jpg',result)    
+        comparison=np.vstack([result,target[0]])
+        plt.imsave(f'demo_results/overfit_test2/train_res{jank_iter}.jpg',comparison)
+        #plt.imsave(f'demo_results/overfit_test2/img{jank_iter}.jpg',torch.permute(img,(1,2,0)).numpy()/255)    
         if jank_iter>500:
             break
-        
+
     return (
         preprocessed_shuttles.groupby(["shuttle_type"])
         .mean(numeric_only=True)
