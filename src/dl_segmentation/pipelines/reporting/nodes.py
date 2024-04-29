@@ -60,7 +60,7 @@ def check_model_inference(num):
         image.unsqueeze_(0)
         result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
         comparison=np.vstack([result,target[0]])
-        plt.imsave(f'demo_results/overfit_test37/res{jank_iter}.jpg',comparison)
+        #plt.imsave(f'demo_results/overfit_test37/res{jank_iter}.jpg',comparison)
         if jank_iter>50:
             break
         #plt.imsave(f'demo_results/overfit_test2/img{jank_iter}.jpg',torch.permute(img,(1,2,0)).numpy()/255)
@@ -74,7 +74,7 @@ def check_model_inference(num):
         image.unsqueeze_(0)
         result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
         comparison=np.vstack([result,target[0]])
-        plt.imsave(f'demo_results/overfit_test37/train_res{jank_iter}.jpg',comparison)  
+        #plt.imsave(f'demo_results/overfit_test37/train_res{jank_iter}.jpg',comparison)  
         if jank_iter>50:
             break
     
