@@ -15,13 +15,14 @@ import numpy as np
 import os
 
 
-def create_demo_dir():
+def create_demo_dir(num):
     demo_path=Path('demo_results/overfit_test37')
     os.mkdir(demo_path)
+    return demo_path
 
 
 # This function uses plotly.graph_objects
-def check_model_inference(preprocessed_shuttles: pd.DataFrame):
+def check_model_inference(num):
     # reference can be retrieved in artifacts panel
     # "VERSION" can be a version (ex: "v2") or an alias ("latest or "best")
 
@@ -76,7 +77,8 @@ def check_model_inference(preprocessed_shuttles: pd.DataFrame):
         plt.imsave(f'demo_results/overfit_test37/train_res{jank_iter}.jpg',comparison)  
         if jank_iter>50:
             break
-
+    
+    return jank_iter
 
 
 # def create_confusion_matrix(companies: pd.DataFrame):

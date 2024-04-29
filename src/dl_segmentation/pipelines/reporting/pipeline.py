@@ -12,9 +12,13 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             node(
                 func=create_demo_dir,
+                inputs="num",
+                outputs="demo_path"
             ),
             node(
                 func=check_model_inference,
+                inputs="num",
+                outputs="jank_iter"
             ),
         ]
     )
