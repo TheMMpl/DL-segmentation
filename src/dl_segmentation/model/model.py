@@ -10,8 +10,6 @@ from torch import optim
 import torch.nn.functional as F
 import wandb
 
-weights=DeepLabV3_ResNet50_Weights.DEFAULT
-#model=deeplabv3_resnet50(weights=weights)
 
 class ResUnet(nn.Module):
     def __init__(self, num_classes):
@@ -36,7 +34,6 @@ class ResUnet(nn.Module):
             nn.Conv2d(64,num_classes,kernel_size=1,stride=1),
         )
         #czemu 1x1 conv- żeby dopasować ilość kanałów - bo robimy res connection ale z inchannenl trzeba zrobić outchannels
-
     
     def forward(self,x):
         skip1=self.layer0(x)+self.sconv(x)
@@ -87,11 +84,9 @@ class LightningModel(L.LightningModule):
         self.lossfunc=nn.CrossEntropyLoss()
 
     def training_step(self, batch, batch_idx):
-        #assumption for now
         x,y=batch
         x=self.unet(x)
-        y = y.squeeze_()
-        y = y.long()
+        y.squeeze_()
         loss=self.lossfunc(x,y)
         self.log("train_loss", loss)
         return loss
@@ -99,9 +94,10 @@ class LightningModel(L.LightningModule):
     def validation_step(self, batch, batch_idx):
         x,y=batch
         pred=self.unet(x)
-        loss=self.lossfunc(x,y)
+        y.squeeze_()
+        loss=self.lossfunc(pred,y)
         self.log("val_loss", loss)
-        return pred
+        #return loss
     
     def predict_step(self, batch, batch_idx):
         x, y = batch
@@ -111,17 +107,14 @@ class LightningModel(L.LightningModule):
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
+
+    def forward(self, x):
+        return self.unet.forward(x)
     
-    def forward(self, batch):
-        return self.unet.forward(batch)
-# unet=LightningModel(20)
-# print(unet.parameters())
-# testmod=ResUnet(20)
-# print(testmod.parameters())
-# testmod.eval()
-# img=read_image("testimg.jpg")
-# #img= read_image("istockphoto-1279831403-612x612.jpg")
-# preprocess = weights.transforms()
-# batch = preprocess(img).unsqueeze(0)
-# r=testmod(batch)
-# print("ziu")
+    def test_step(self, batch, batch_idx):
+        x,y = batch
+        pred = self.unet(x)
+        y.squeeze_()
+        loss=self.lossfunc(pred,y)
+        self.log("test_loss", loss)
+        return loss

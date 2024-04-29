@@ -1,7 +1,7 @@
 from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import (
-    compare_passenger_capacity_exp,
+    check_model_inference,
     compare_passenger_capacity_go,
     create_confusion_matrix,
 )
@@ -12,7 +12,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(
-                func=compare_passenger_capacity_exp,
+                func=check_model_inference,
                 inputs="preprocessed_shuttles",
                 outputs="shuttle_passenger_capacity_plot_exp",
             ),

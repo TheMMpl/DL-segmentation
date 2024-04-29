@@ -2,34 +2,33 @@ import pytorch_lightning as L
 from dl_segmentation.model.model import LightningModel
 from torchvision.datasets import Cityscapes
 from torch.utils.data import DataLoader
-from lightning.pytorch.loggers import WandbLogger
-from lightning.pytorch import Trainer
-from lightning.pytorch.callbacks import ModelCheckpoint
 from torchvision import transforms
 from torchvision.transforms import v2
 import torch
+from torchvision.models.segmentation import deeplabv3_resnet101, DeepLabV3_ResNet101_Weights
+
+IMG_SIZE=256
 
 class CityScapesTransform:
     def __call__(self, image, target):
-        trans = [transforms.PILToTensor(), transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((128,128))]
-        for t in trans:
+        trans_im = [transforms.PILToTensor(), transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((IMG_SIZE,IMG_SIZE*2))]
+        trans_tar = [transforms.PILToTensor(), transforms.v2.ToDtype(torch.long, scale=False), transforms.v2.Resize((IMG_SIZE,IMG_SIZE*2),interpolation=transforms.InterpolationMode.NEAREST)]
+        for t in trans_im:
             image = t(image)
+        for t in trans_tar:
             target = t(target)
         return image, target
 
-
+class ExtraLabelsTransform:
+    def __call__(self, image, target):
+        weights=DeepLabV3_ResNet101_Weights.DEFAULT
+        trans_im=weights.transforms()
+        trans_tar = [transforms.PILToTensor(), transforms.v2.ToDtype(torch.long, scale=False), transforms.v2.Resize((IMG_SIZE,IMG_SIZE*2),interpolation=transforms.InterpolationMode.NEAREST)]
+        image=trans_im(image)
+        for t in trans_tar:
+            target = t(target)
+        return image, target
 
 # To wszystko co tu było jest w data_science.nodes.py
-
-#some loading code for later
-
-# reference can be retrieved in artifacts panel
-# "VERSION" can be a version (ex: "v2") or an alias ("latest or "best")
-checkpoint_reference = "USER/PROJECT/MODEL-RUN_ID:VERSION"
-
-# download checkpoint locally (if not already cached)
-#wandb_logger.download_artifact(checkpoint_reference, artifact_type="model")
-# load checkpoint
-#model = LightningModel.load_from_checkpoint(Path(artifact_dir) / "model.ckpt")
 
 
