@@ -1,9 +1,20 @@
 from typing import Dict, Tuple
-
+from torchvision.models.segmentation import deeplabv3_resnet101, DeepLabV3_ResNet101_Weights
+from torchvision.datasets import Cityscapes
+from torch.utils.data import DataLoader
 import pandas as pd
+import torch
+from dl_segmentation.pipelines.train import CityScapesTransform
+from dl_segmentation.pipelines.train import ExtraLabelsTransform
+from torchvision import transforms
+
+BATCH_SIZE = 8
+NUM_WORKERS = 8
+NUM_CLASSES = 34
 
 
 def _is_true(x: pd.Series) -> pd.Series:
+
     return x == "t"
 
 
@@ -28,6 +39,32 @@ def preprocess_companies(companies: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
         Preprocessed data, with `company_rating` converted to a float and
         `iata_approved` converted to boolean.
     """
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    weights=DeepLabV3_ResNet101_Weights.DEFAULT
+    model=deeplabv3_resnet101(weights=weights).to(device)
+    
+
+    test_dataset = Cityscapes('./dataset/cityscapes', split='test',
+                     target_type='semantic', transforms = ExtraLabelsTransform())
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
+
+    model.eval()
+    jank_iter=0
+    #we don't vectorize because we need to save the results anyways
+    for img,target in test_dataset:
+        jank_iter+=1
+        with torch.no_grad():
+            img=img.to(device).unsqueeze(0)
+            result=model(img)
+            print(result['out'].shape)
+        #result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
+        #comparison=np.vstack([result,target[0]])
+        #plt.imsave(f'demo_results/overfit_test37/train_res{jank_iter}.jpg',comparison)
+        #plt.imsave(f'demo_results/overfit_test2/img{jank_iter}.jpg',torch.permute(img,(1,2,0)).numpy()/255)    
+        if jank_iter>10:
+            break
+
     companies["iata_approved"] = _is_true(companies["iata_approved"])
     companies["company_rating"] = _parse_percentage(companies["company_rating"])
     return companies, {"columns": companies.columns.tolist(), "data_type": "companies"}
