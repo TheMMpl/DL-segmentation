@@ -2,6 +2,9 @@ import logging
 from typing import Dict, Tuple
 import os
 
+import torch
+from PIL import Image
+import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import max_error, mean_absolute_error, r2_score
@@ -44,6 +47,7 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
 
 
 def train_model():
+
     unet=LightningModel(NUM_CLASSES)
     
     wandb_logger = WandbLogger(project="DL_segmenation",log_model="all")
@@ -69,3 +73,4 @@ def test_model(unet, trainer):
     trainer.test(model=unet,dataloaders=test_loader)
     
     return {"A":0.}
+
