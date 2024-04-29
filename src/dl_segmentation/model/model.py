@@ -107,7 +107,7 @@ class LightningModel(L.LightningModule):
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
-    
+
     def forward(self, x):
         return self.unet.forward(x)
     
@@ -118,4 +118,3 @@ class LightningModel(L.LightningModule):
         loss=self.lossfunc(pred,y)
         self.log("test_loss", loss)
         return loss
-
