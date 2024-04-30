@@ -16,9 +16,8 @@ import os
 
 
 def create_demo_dir(num):
-    demo_path=Path('demo_results/overfit_test37')
-    os.mkdir(demo_path)
-    return demo_path
+    Path("demo_results/overfit_test37").mkdir(parents=True, exist_ok=True)
+    return 0
 
 
 # This function uses plotly.graph_objects
