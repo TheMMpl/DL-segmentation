@@ -1,9 +1,9 @@
-import pytorch_lightning as L
+#import pytorch_lightning as L
 import torch
 from torchvision.datasets import Cityscapes
 from torch.utils.data import DataLoader
 from torchvision.io.image import read_image
-from dl_segmentation.model.model import model, weights
+#from dl_segmentation.model.model import model, weights
 
 # model.eval()
 # #tu testowy fragment danych
