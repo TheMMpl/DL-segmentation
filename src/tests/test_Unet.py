@@ -8,14 +8,16 @@ from dl_segmentation.pipelines.train import CityScapesTransform
 from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision import transforms
 import numpy as np
+from kedro.io import DataCatalog
+import matplotlib.pyplot as plt
+from consts import NUM_CLASSES
 
-NUM_CLASSES=34
 data_params=("demo_results/test_test",'./dataset/cityscapes')
 model_checkpoint='dlprojekt/DL_segmenation/model-daeah9nu:v37'
 test_size=10
 metric = MulticlassJaccardIndex(num_classes=NUM_CLASSES)
 
-#@pytest.mark.parametrize("results_path,dataset_path",data_params)
+
 @pytest.fixture()
 def prepare_data(request):
     Path(request.param[0]).mkdir(parents=True, exist_ok=True)
@@ -23,7 +25,6 @@ def prepare_data(request):
     return val_dataset, request.param[0]
 
 
-#@pytest.mark.parametrize("model_checkpoint",model_checkpoint)
 @pytest.fixture()
 def prepare_model(request):
     run = wandb.init(project="DL_segmenation")
@@ -53,12 +54,7 @@ def test_model(test_size,metric,prepare_data,prepare_model):
         image.unsqueeze_(0)
         result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
         comparison=np.vstack([result,target[0]])
-        #plt.imsave(f'demo_results/overfit_test37/res{jank_iter}.jpg',comparison)
+        plt.imsave(f'{results_path}/res{image_num}.jpg',comparison)
         if image_num>test_size:
             break
     
-
-#def test_Unet(model_path,results_path,dataset_path,test_size,metric):
-
-#trainer = L.Trainer(limit_train_batches=2, max_epochs=1)
-#train_loader=DataLoader(Cityscapes)
