@@ -3,10 +3,11 @@ Warning, you must run pip install -e . in the root directory for these imports t
 
 '''
 import os
+from pathlib import Path
+import matplotlib.pyplot as plt
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
-
 from dl_segmentation.pipelines.reporting.nodes import load_model, prepare_data, run_inference
 from consts import NUM_CLASSES, MODEL_CHECKPOINT
 
@@ -16,16 +17,20 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def get_results(filepath,filename):
-    load_model()
-    prepare_data()
-    result=run_inference()
-    result.save(os.path.join(app.config['RESULTS_FOLDER'], filename))
+def save_results(filepath,filename):
+    Path(RESULTS_FOLDER).mkdir(parents=True, exist_ok=True)
+    model=load_model(MODEL_CHECKPOINT)
+    data=prepare_data([filepath])
+    results=run_inference(model,data)
+    for res in results:
+        plt.imsave(os.path.join(app.config['RESULTS_FOLDER'], filename),res)
+    #result.save(os.path.join(app.config['RESULTS_FOLDER'], filename))
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -45,9 +50,9 @@ def upload_file():
             filepath=os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             print("file saved!")
-            get_results(filepath)
+            save_results(filepath,filename)
             print("results ok!")
-            return redirect(url_for('download_file', name=filename))
+            return redirect(url_for('retrieve_file', name=filename))
     return '''
     <!doctype html>
     <title>Upload new File</title>
@@ -58,9 +63,13 @@ def upload_file():
     </form>
     '''
 
-@app.route('/uploads/<name>')
-def download_file(name):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+@app.route('/results/<name>')
+def retrieve_file(name):
+    return send_from_directory(app.config["RESULTS_FOLDER"], name)
+
+# @app.route('/uploads/<name>')
+# def download_file(name):
+#     return send_from_directory(app.config["UPLOAD_FOLDER"], name)
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

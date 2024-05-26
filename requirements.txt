@@ -20,3 +20,5 @@ pytorch_lightning
 wandb
 torchvision
 lightning
+flask
+

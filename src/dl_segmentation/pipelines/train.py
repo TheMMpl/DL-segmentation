@@ -6,8 +6,7 @@ from torchvision import transforms
 from torchvision.transforms import v2
 import torch
 from torchvision.models.segmentation import deeplabv3_resnet101, DeepLabV3_ResNet101_Weights
-
-IMG_SIZE=256
+from consts import IMG_SIZE
 
 class CityScapesTransform:
     def __call__(self, image, target):

@@ -13,23 +13,44 @@ from pathlib import Path
 from torch.utils.data import DataLoader
 import numpy as np
 import os
+from consts import NUM_CLASSES, IMG_SIZE
+from PIL import Image
+'''
+These fucntions may be incorporated into the pipeline later
+'''
+
+def prepare_data(imagepaths):
+    transform = transforms.v2.Compose([transforms.PILToTensor(), transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((IMG_SIZE,IMG_SIZE*2))])
+    images=[Image.open(img) for img in imagepaths]
+    return [transform(img) for img in images]
+
+def load_model(checkpoint):
+    run = wandb.init(project="DL_segmenation")
+    artifact = run.use_artifact(checkpoint, type="model")
+    artifact_dir = artifact.download()
+    model = LightningModel.load_from_checkpoint(Path(artifact_dir) / "model.ckpt",num_classes=NUM_CLASSES)
+    model.eval()
+    model.unet.eval()
+    return model
+
+def run_inference(model,data):
+    result=[]
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    for img in data:
+        image=img.to(device)
+        image.unsqueeze_(0)
+        result.append(torch.argmax(model(image)[0],dim=0).cpu().detach().numpy())
+    return result
 
 
+'''
+inference pipeline
+'''
 def create_demo_dir(num):
     Path("demo_results/overfit_test38").mkdir(parents=True, exist_ok=True)
     return 0
 
-def prepare_data(img):
-    prepared=0
-    return prepared
 
-def load_model(checkpoint):
-    model=0
-    return model
-
-def run_inference(model,data):
-    result=model(data)
-    return result
 # This function uses plotly.graph_objects
 def check_model_inference(num):
     # reference can be retrieved in artifacts panel
@@ -69,7 +90,7 @@ def check_model_inference(num):
         image.unsqueeze_(0)
         result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
         comparison=np.vstack([result,target[0]])
-        plt.imsave(f'demo_results/overfit_test38/res{jank_iter}.jpg',comparison)
+        #plt.imsave(f'demo_results/overfit_test38/res{jank_iter}.jpg',comparison)
         if jank_iter>50:
             break
         #plt.imsave(f'demo_results/overfit_test2/img{jank_iter}.jpg',torch.permute(img,(1,2,0)).numpy()/255)
