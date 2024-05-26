@@ -16,10 +16,20 @@ import os
 
 
 def create_demo_dir(num):
-    Path("demo_results/overfit_test37").mkdir(parents=True, exist_ok=True)
+    Path("demo_results/overfit_test38").mkdir(parents=True, exist_ok=True)
     return 0
 
+def prepare_data(img):
+    prepared=0
+    return prepared
 
+def load_model(checkpoint):
+    model=0
+    return model
+
+def run_inference(model,data):
+    result=model(data)
+    return result
 # This function uses plotly.graph_objects
 def check_model_inference(num):
     # reference can be retrieved in artifacts panel
@@ -32,7 +42,7 @@ def check_model_inference(num):
 
     #larger images
     #checkpoint_reference='dlprojekt/DL_segmenation/model-daeah9nu:v23'
-    checkpoint_reference='dlprojekt/DL_segmenation/model-daeah9nu:v37'
+    checkpoint_reference='dlprojekt/DL_segmenation/model-daeah9nu:best'
 
     #model_name="model-jql8pobq:v20"
     # download checkpoint locally (if not already cached)
@@ -59,7 +69,7 @@ def check_model_inference(num):
         image.unsqueeze_(0)
         result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
         comparison=np.vstack([result,target[0]])
-        #plt.imsave(f'demo_results/overfit_test37/res{jank_iter}.jpg',comparison)
+        plt.imsave(f'demo_results/overfit_test38/res{jank_iter}.jpg',comparison)
         if jank_iter>50:
             break
         #plt.imsave(f'demo_results/overfit_test2/img{jank_iter}.jpg',torch.permute(img,(1,2,0)).numpy()/255)
