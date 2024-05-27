@@ -1,8 +1,10 @@
 from kedro.pipeline import Pipeline, node, pipeline
 
 from .nodes import (
-    check_model_inference,
-    create_demo_dir,
+    load_model,
+    prepare_dataset,
+    run_inference,
+    save_results,
 )
 
 
@@ -11,14 +13,28 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(
-                func=create_demo_dir,
-                inputs="num",
-                outputs="demo_path"
+                func=load_model,
+                inputs="params:model_checkpoint",
+                outputs="model",
+                name="load_model_node",
             ),
             node(
-                func=check_model_inference,
-                inputs="num",
-                outputs="jank_iter"
+                func=prepare_dataset,
+                inputs="params:image_amount",
+                outputs="val_snippet",
+                name="load_data_node",
+            ),
+            node(
+                func=run_inference,
+                inputs=["model","val_snippet"],
+                outputs="result",
+                name="run_inference_node",
+            ),
+            node(
+                func=save_results,
+                inputs="result",
+                outputs="results",
+                name="save_results_node",
             ),
         ]
     )

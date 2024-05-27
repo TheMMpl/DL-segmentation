@@ -7,22 +7,25 @@ import wandb
 from dl_segmentation.model.model import LightningModel
 from torchvision.datasets import Cityscapes
 from dl_segmentation.pipelines.train import CityScapesTransform
+from torchmetrics.classification import MulticlassJaccardIndex
 from torchvision import transforms
 import torch
 from pathlib import Path
 from torch.utils.data import DataLoader
 import numpy as np
 import os
-from consts import NUM_CLASSES, IMG_SIZE
+from consts import NUM_CLASSES, IMG_SIZE, MODEL_CHECKPOINT
 from PIL import Image
-'''
-These fucntions may be incorporated into the pipeline later
-'''
 
+# used when loading a single image
 def prepare_data(imagepaths):
     transform = transforms.v2.Compose([transforms.PILToTensor(), transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((IMG_SIZE,IMG_SIZE*2))])
     images=[Image.open(img) for img in imagepaths]
     return [transform(img) for img in images]
+
+'''
+evaluation pipeline
+'''
 
 def load_model(checkpoint):
     run = wandb.init(project="DL_segmenation")
@@ -33,91 +36,36 @@ def load_model(checkpoint):
     model.unet.eval()
     return model
 
+def prepare_dataset(image_amount):
+    val_dataset = Cityscapes('./dataset/cityscapes', split='val',target_type='semantic', transforms = CityScapesTransform())
+    train_dataset = Cityscapes('./dataset/cityscapes', split='train',
+                     target_type='semantic', transforms = CityScapesTransform())
+    transform=transforms.v2.Compose([transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((256,512))])
+    val_snippet=[(transform(img),target) for i,(img,target) in enumerate(val_dataset) if i<image_amount]
+    train_snippet=[(transform(img),target) for i,(img,target) in enumerate(train_dataset) if i<image_amount]
+    return val_snippet #, train_snippet
+
 def run_inference(model,data):
     result=[]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     for img in data:
-        image=img.to(device)
-        image.unsqueeze_(0)
-        result.append(torch.argmax(model(image)[0],dim=0).cpu().detach().numpy())
+        if type(img) is tuple:
+            image=img[0].to(device)
+            image.unsqueeze_(0)
+            output=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
+            result.append(np.vstack([output,img[1][0]]))
+        else:
+            image=img.to(device)
+            image.unsqueeze_(0)
+            result.append(torch.argmax(model(image)[0],dim=0).cpu().detach().numpy())
     return result
 
-
-'''
-inference pipeline
-'''
-def create_demo_dir(num):
-    Path("demo_results/overfit_test38").mkdir(parents=True, exist_ok=True)
-    return 0
-
-
-# This function uses plotly.graph_objects
-def check_model_inference(num):
-    # reference can be retrieved in artifacts panel
-    # "VERSION" can be a version (ex: "v2") or an alias ("latest or "best")
-
-    #noted checkpoints
-    #checkpoint_reference = "dlprojekt/DL_segmenation/model-jql8pobq:v20"
-    #checkpoint_reference='dlprojekt/DL_segmenation/model-6cwa5z66:v92'
-    #checkpoint_reference='dlprojekt/DL_segmenation/model-6cwa5z66:v26'
-
-    #larger images
-    #checkpoint_reference='dlprojekt/DL_segmenation/model-daeah9nu:v23'
-    checkpoint_reference='dlprojekt/DL_segmenation/model-daeah9nu:best'
-
-    #model_name="model-jql8pobq:v20"
-    # download checkpoint locally (if not already cached)
-    run = wandb.init(project="DL_segmenation")
-    artifact = run.use_artifact(checkpoint_reference, type="model")
-    artifact_dir = artifact.download()
-    print(artifact_dir)
-    # load checkpoint
-    model = LightningModel.load_from_checkpoint(Path(artifact_dir) / "model.ckpt",num_classes=34)
-    model.eval()
-    model.unet.eval()
-    val_dataset = Cityscapes('./dataset/cityscapes', split='val',target_type='semantic', transforms = CityScapesTransform())
-    train_dataset = Cityscapes('./dataset/cityscapes', split='train',
-                     target_type='semantic', transforms = CityScapesTransform())
-    #necessarry because we don't use the trainer here
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((256,512))]
-    jank_iter=0
-    for img,target in val_dataset:
-        jank_iter+=1
-        for t in trans:
-            img=t(img)
-        image=img.to(device)
-        image.unsqueeze_(0)
-        result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
-        comparison=np.vstack([result,target[0]])
-        #plt.imsave(f'demo_results/overfit_test38/res{jank_iter}.jpg',comparison)
-        if jank_iter>50:
-            break
-        #plt.imsave(f'demo_results/overfit_test2/img{jank_iter}.jpg',torch.permute(img,(1,2,0)).numpy()/255)
-
-    jank_iter=0
-    for img,target in train_dataset:
-        jank_iter+=1
-        for t in trans:
-            img=t(img)
-        image=img.to(device)
-        image.unsqueeze_(0)
-        result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
-        comparison=np.vstack([result,target[0]])
-        #plt.imsave(f'demo_results/overfit_test37/train_res{jank_iter}.jpg',comparison)  
-        if jank_iter>50:
-            break
-    
-    return jank_iter
+def save_results(results):
+    Path(f"demo_results/{MODEL_CHECKPOINT}").mkdir(parents=True, exist_ok=True)
+    metric = MulticlassJaccardIndex(num_classes=NUM_CLASSES)
+    for i,res in enumerate(results):
+        plt.imsave(f'demo_results/{MODEL_CHECKPOINT}/res{i}.jpg',res)
+    return results
 
 
-# def create_confusion_matrix(companies: pd.DataFrame):
-#     actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]
-#     predicted = [1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1]
-#     data = {"y_Actual": actuals, "y_Predicted": predicted}
-#     df = pd.DataFrame(data, columns=["y_Actual", "y_Predicted"])
-#     confusion_matrix = pd.crosstab(
-#         df["y_Actual"], df["y_Predicted"], rownames=["Actual"], colnames=["Predicted"]
-#     )
-#     sn.heatmap(confusion_matrix, annot=True)
-#     return plt
+

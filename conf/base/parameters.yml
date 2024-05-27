@@ -1,2 +1,3 @@
 seed: 12345
-
+model_checkpoint: 'dlprojekt/DL_segmenation/model-daeah9nu:best'
+image_amount: 10
