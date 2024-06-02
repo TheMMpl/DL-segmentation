@@ -9,15 +9,14 @@ from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from dl_segmentation.pipelines.reporting.nodes import load_model, prepare_data, run_inference
-from consts import NUM_CLASSES, MODEL_CHECKPOINT
+from consts import NUM_CLASSES, MODEL_CHECKPOINT, UPLOAD_FOLDER, RESULTS_FOLDER
 
 # UPLOAD_FOLDER = '../../../data'
 # RESULTS_FOLDER = '../../../results'
-UPLOAD_FOLDER = 'data'
-RESULTS_FOLDER = 'results'
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-app = Flask(__name__,static_folder='results')
+app = Flask(__name__,static_folder=os.path.abspath("results/"))
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
 
@@ -71,9 +70,6 @@ def retrieve_file(name):
     #os.path.join(root_dir,app.config["RESULTS_FOLDER"])
     return send_from_directory(app.static_folder, name)
 
-# @app.route('/uploads/<name>')
-# def download_file(name):
-#     return send_from_directory(app.config["UPLOAD_FOLDER"], name)
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
