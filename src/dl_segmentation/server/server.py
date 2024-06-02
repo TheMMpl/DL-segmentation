@@ -11,11 +11,13 @@ from flask import send_from_directory
 from dl_segmentation.pipelines.reporting.nodes import load_model, prepare_data, run_inference
 from consts import NUM_CLASSES, MODEL_CHECKPOINT
 
-UPLOAD_FOLDER = '../../../data'
-RESULTS_FOLDER = '../../../results'
+# UPLOAD_FOLDER = '../../../data'
+# RESULTS_FOLDER = '../../../results'
+UPLOAD_FOLDER = 'data'
+RESULTS_FOLDER = 'results'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-app = Flask(__name__)
+app = Flask(__name__,static_folder='results')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
 
@@ -65,7 +67,9 @@ def upload_file():
 
 @app.route('/results/<name>')
 def retrieve_file(name):
-    return send_from_directory(app.config["RESULTS_FOLDER"], name)
+    #root_dir = os.path.dirname(os.getcwd())
+    #os.path.join(root_dir,app.config["RESULTS_FOLDER"])
+    return send_from_directory(app.static_folder, name)
 
 # @app.route('/uploads/<name>')
 # def download_file(name):
