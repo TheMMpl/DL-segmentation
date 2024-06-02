@@ -10,12 +10,13 @@ from torchvision import transforms
 import numpy as np
 from kedro.io import DataCatalog
 import matplotlib.pyplot as plt
-from consts import NUM_CLASSES
+from consts import NUM_CLASSES, MODEL_CHECKPOINT
 
 data_params=("demo_results/test_IoU",'./dataset/cityscapes')
-model_checkpoint='dlprojekt/DL_segmenation/model-daeah9nu:v37'
+model_checkpoint=MODEL_CHECKPOINT
 test_size=10
-metric = MulticlassJaccardIndex(num_classes=NUM_CLASSES)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+metric = MulticlassJaccardIndex(num_classes=NUM_CLASSES).to(device)
 
 
 @pytest.fixture(scope="session")
@@ -37,16 +38,18 @@ def prepare_model(request):
     return model
  
 
-@pytest.mark.parametrize("test_size,metric,prepare_data,prepare_model",[(test_size,metric,data_params,model_checkpoint)],
+@pytest.mark.parametrize("test_size,metric,device,prepare_data,prepare_model",[(test_size,metric,device,data_params,model_checkpoint)],
                          indirect=["prepare_data","prepare_model"])
-def test_model(test_size,metric,prepare_data,prepare_model):
+def test_model(test_size,metric,device,prepare_data,prepare_model):
     """
     test model inference on a number of images from the validation dataset and check the IoU metric relative to the ground truth
     """
+    
     IoU=0
     model=prepare_model
     val_dataset,results_path=prepare_data
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #metric = MulticlassJaccardIndex(num_classes=NUM_CLASSES).to(device)
     trans = [transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((256,512))]
     image_num=0
     for img,target in val_dataset:
@@ -57,7 +60,7 @@ def test_model(test_size,metric,prepare_data,prepare_model):
         image.unsqueeze_(0)
         output=model(image)[0]
         preds=output.view(output.size(0),-1).unsqueeze_(0)
-        target_tensor=target[0].flatten().unsqueeze_(0)
+        target_tensor=target[0].flatten().unsqueeze_(0).to(device)
         IoU+=metric(preds,target_tensor)
         result=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
         comparison=np.vstack([result,target[0]])
