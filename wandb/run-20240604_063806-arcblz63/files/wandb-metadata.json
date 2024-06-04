@@ -1,0 +1,81 @@
+{
+    "os": "Linux-5.10.0-29-amd64-x86_64-with-glibc2.31",
+    "python": "3.9.2",
+    "heartbeatAt": "2024-06-04T11:38:07.270077",
+    "startedAt": "2024-06-04T11:38:06.474822",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "run"
+    ],
+    "state": "running",
+    "program": "/home/michal/.local/bin/kedro",
+    "codePathLocal": null,
+    "git": {
+        "remote": "https://github.com/TheMMpl/DL-segmentation",
+        "commit": "20ea84e1f69bcafce1303b9271ff1f47e3e363c6"
+    },
+    "email": null,
+    "root": "/media/michal/N/hasik2/DL-segmentation",
+    "host": "debian",
+    "username": "michal",
+    "executable": "/usr/bin/python3",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 1421.828875,
+        "min": 400.0,
+        "max": 3600.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1229.473,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 1615.678,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 1190.121,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2007.628,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 1290.738,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 1301.755,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 1190.417,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 1548.821,
+            "min": 400.0,
+            "max": 3600.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 58.75761032104492,
+            "used": 25.20484161376953
+        }
+    },
+    "memory": {
+        "total": 7.532135009765625
+    }
+}

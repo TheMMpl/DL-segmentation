@@ -1,0 +1,80 @@
+{
+    "os": "Linux-5.10.0-29-amd64-x86_64-with-glibc2.31",
+    "python": "3.9.2",
+    "heartbeatAt": "2024-06-02T22:58:05.407206",
+    "startedAt": "2024-06-02T22:58:04.606486",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/media/michal/N/hasik2/DL-segmentation/src/dl_segmentation/server/server.py",
+    "codePathLocal": "dl_segmentation/server/server.py",
+    "codePath": "src/dl_segmentation/server/server.py",
+    "git": {
+        "remote": "https://github.com/TheMMpl/DL-segmentation",
+        "commit": "917ac078f9c9005e978a70ffb17183eaf3dd1c3e"
+    },
+    "email": null,
+    "root": "/media/michal/N/hasik2/DL-segmentation",
+    "host": "debian",
+    "username": "michal",
+    "executable": "/usr/bin/python3",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 2144.371875,
+        "min": 400.0,
+        "max": 3600.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2553.473,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 1772.052,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2100.965,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2205.492,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2522.105,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2065.228,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2134.708,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 1800.952,
+            "min": 400.0,
+            "max": 3600.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 58.75761032104492,
+            "used": 25.23894500732422
+        }
+    },
+    "memory": {
+        "total": 7.532135009765625
+    }
+}

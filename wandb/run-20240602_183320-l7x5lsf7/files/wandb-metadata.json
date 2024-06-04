@@ -1,0 +1,83 @@
+{
+    "os": "Linux-5.10.0-29-amd64-x86_64-with-glibc2.31",
+    "python": "3.9.2",
+    "heartbeatAt": "2024-06-02T23:33:21.212683",
+    "startedAt": "2024-06-02T23:33:20.439063",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--app",
+        "./src/dl_segmentation/server/server.py",
+        "run"
+    ],
+    "state": "running",
+    "program": "-m flask.__main__",
+    "codePathLocal": null,
+    "git": {
+        "remote": "https://github.com/TheMMpl/DL-segmentation",
+        "commit": "6d12da223ed381247323013b5f1d64a65c610045"
+    },
+    "email": null,
+    "root": "/media/michal/N/hasik2/DL-segmentation",
+    "host": "debian",
+    "username": "michal",
+    "executable": "/usr/bin/python3",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 3016.145625,
+        "min": 400.0,
+        "max": 3600.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3097.364,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 3269.752,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2871.061,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2916.193,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2813.825,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 3119.212,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 3096.166,
+            "min": 400.0,
+            "max": 3600.0
+        },
+        {
+            "current": 2945.592,
+            "min": 400.0,
+            "max": 3600.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 58.75761032104492,
+            "used": 25.238971710205078
+        }
+    },
+    "memory": {
+        "total": 7.532135009765625
+    }
+}

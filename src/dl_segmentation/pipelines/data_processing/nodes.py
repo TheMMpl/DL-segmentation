@@ -4,14 +4,12 @@ from torchvision.datasets import Cityscapes
 from torch.utils.data import DataLoader
 import pandas as pd
 import torch
+import os
 from dl_segmentation.pipelines.train import CityScapesTransform
 from dl_segmentation.pipelines.train import ExtraLabelsTransform
 from torchvision import transforms
 
-BATCH_SIZE = 8
-NUM_WORKERS = 8
-NUM_CLASSES = 34
-
+from consts import BATCH_SIZE, NUM_WORKERS, NUM_CLASSES, CITYSCAPES_PASSWORD, CITYSCAPES_USERNAME, DOWNLOAD_DATASET
 
 def _is_true(x: pd.Series) -> pd.Series:
 
@@ -44,6 +42,18 @@ def preprocess_companies(companies: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
     weights=DeepLabV3_ResNet101_Weights.DEFAULT
     model=deeplabv3_resnet101(weights=weights).to(device)
     
+    if DOWNLOAD_DATASET == 1:
+    	os.system("wget --keep-session-cookies --save-cookies=cookies.txt --post-data 'username="+CITYSCAPES_USERNAME+"&password="+CITYSCAPES_PASSWORD+"&submit=Login' https://www.cityscapes-dataset.com/login/; history -d $((HISTCMD-1))")
+    	os.system("wget --load-cookies cookies.txt --content-disposition https://www.cityscapes-dataset.com/file-handling/?packageID=1")
+    	os.system("wget --load-cookies cookies.txt --content-disposition https://www.cityscapes-dataset.com/file-handling/?packageID=3")
+    	os.system("unzip gtFine_trainvaltest.zip -d ./dataset/cityscapes")
+    	os.system("rm ./dataset/cityscapes/license.txt")
+    	os.system("rm ./dataset/cityscapes/README")
+    	os.system("unzip leftImg8bit_trainvaltest.zip -d ./dataset/cityscapes")
+    	os.system("rm ./dataset/cityscapes/license.txt")
+    	os.system("rm ./dataset/cityscapes/README")
+    	os.system("rm ./leftImg8bit_trainvaltest.zip")
+    	os.system("rm ./gtFine_trainvaltest.zip")
 
     test_dataset = Cityscapes('./dataset/cityscapes', split='test',
                      target_type='semantic', transforms = ExtraLabelsTransform())

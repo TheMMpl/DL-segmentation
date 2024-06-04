@@ -22,12 +22,7 @@ from torchvision import transforms
 from torchvision.transforms import v2
 import torch
 from matplotlib import pyplot as plt
-
-BATCH_SIZE = 16
-MAX_EPOCHS = 100
-NUM_WORKERS = 8
-LOG_STEPS = 5
-NUM_CLASSES = 34
+from consts import BATCH_SIZE, MAX_EPOCHS, NUM_WORKERS, LOG_STEPS, NUM_CLASSES
 
 def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
     """Splits data into features and targets training and test sets.
