@@ -3,8 +3,8 @@ We trained a residual Unet network to perform image segmentation on the Cityscap
 Here you can view some sample results:
 | Image                                        | Result (Bottom - Ground Truth, Top - Model output) | IoU        |
 |----------------------------------------------|----------------------------------------------------|------------|
-| ![image info](./data/demo_results/img1.jpg)  | ![image info](./data/demo_results/res1.jpg)        | 0.40464944 |
-| ![image info](./data/demo_results/img3.jpg)  | ![image info](./data/demo_results/res3.jpg)        | 0.4845726  |
+| ![image info](./demo_results/dlprojekt/DL_segmenation/model-daeah9nu:best/img1.jpg)  | ![image info](./demo_results/dlprojekt/DL_segmenation/model-daeah9nu:best/res1.jpg)       | 0.40464944 |
+| ![image info](./demo_results/dlprojekt/DL_segmenation/model-daeah9nu:best/img3.jpg)   | ![image info](./demo_results/dlprojekt/DL_segmenation/model-daeah9nu:best/res3.jpg)       | 0.4845726  |
 
 ## Installation
 Clone the repository and build the docker image with
