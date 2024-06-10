@@ -38,34 +38,42 @@ def load_model(checkpoint):
 
 def prepare_dataset(image_amount):
     val_dataset = Cityscapes('./dataset/cityscapes', split='val',target_type='semantic', transforms = CityScapesTransform())
-    train_dataset = Cityscapes('./dataset/cityscapes', split='train',
-                     target_type='semantic', transforms = CityScapesTransform())
+    #train_dataset = Cityscapes('./dataset/cityscapes', split='train',target_type='semantic', transforms = CityScapesTransform())
     transform=transforms.v2.Compose([transforms.v2.ToDtype(torch.float32, scale=True), transforms.v2.Resize((256,512))])
     val_snippet=[(transform(img),target) for i,(img,target) in enumerate(val_dataset) if i<image_amount]
-    train_snippet=[(transform(img),target) for i,(img,target) in enumerate(train_dataset) if i<image_amount]
-    return val_snippet #, train_snippet
+    image_snippet=[img for i,(img,target) in enumerate(val_dataset) if i<image_amount]
+    #train_snippet=[(transform(img),target) for i,(img,target) in enumerate(train_dataset) if i<image_amount]
+    return val_snippet, image_snippet#, train_snippet
 
 def run_inference(model,data):
-    result=[]
+    results=[]
+    IoU=[]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    metric = MulticlassJaccardIndex(num_classes=NUM_CLASSES).to(device)
     for img in data:
         if type(img) is tuple:
             image=img[0].to(device)
             image.unsqueeze_(0)
-            output=torch.argmax(model(image)[0],dim=0).cpu().detach().numpy()
-            result.append(np.vstack([output,img[1][0]]))
+            output=model(image)[0]
+            pred=output.view(output.size(0),-1).unsqueeze_(0)
+            target_tensor=img[1][0].flatten().unsqueeze_(0).to(device)
+            IoU.append(metric(pred,target_tensor).cpu().detach().numpy())
+            result=torch.argmax(output,dim=0).cpu().detach().numpy()
+            results.append(np.vstack([result,img[1][0]]))
         else:
             image=img.to(device)
             image.unsqueeze_(0)
-            result.append(torch.argmax(model(image)[0],dim=0).cpu().detach().numpy())
-    return result
+            results.append(torch.argmax(model(image)[0],dim=0).cpu().detach().numpy())
+    return results, IoU
 
-def save_results(results):
+def save_results(results,images,IoU):
+    metrics=pd.DataFrame(IoU,columns=['IoU'])
     Path(f"demo_results/{MODEL_CHECKPOINT}").mkdir(parents=True, exist_ok=True)
-    metric = MulticlassJaccardIndex(num_classes=NUM_CLASSES)
     for i,res in enumerate(results):
         plt.imsave(f'demo_results/{MODEL_CHECKPOINT}/res{i}.jpg',res)
-    return results
+    for i, img in enumerate(images):
+        plt.imsave(f'demo_results/{MODEL_CHECKPOINT}/img{i}.jpg',torch.permute(img,(1,2,0)).cpu().detach().numpy())
+    return results, metrics
 
 
 

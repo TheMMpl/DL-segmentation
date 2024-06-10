@@ -21,19 +21,19 @@ def create_pipeline(**kwargs) -> Pipeline:
             node(
                 func=prepare_dataset,
                 inputs="params:image_amount",
-                outputs="val_snippet",
+                outputs=["val_snippet","image_snippet"],
                 name="load_data_node",
             ),
             node(
                 func=run_inference,
                 inputs=["model","val_snippet"],
-                outputs="result",
+                outputs=["result","IoU"],
                 name="run_inference_node",
             ),
             node(
                 func=save_results,
-                inputs="result",
-                outputs="results",
+                inputs=["result","image_snippet","IoU"],
+                outputs=["results","IoU_metrics"],
                 name="save_results_node",
             ),
         ]
