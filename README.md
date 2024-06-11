@@ -20,6 +20,6 @@ sudo docker  run -p 5000:5000 -v $(pwd):$(pwd) -w $(pwd) -it -t  segmentation sh
 To download the dataset set `DOWNLOAD_DATASET=1` in `./src/consts.py` and provide your username and password for Cityscapes account.
 
 ```
-sudo docker run -v $(pwd):$(pwd) -w $(pwd) -it -t  segmentation kedro run --pipeline=reporting
+sudo docker run -v $(pwd):$(pwd) -w $(pwd) -it -t  segmentation kedro run --pipeline=downloading_data
 ```
 

@@ -24,22 +24,6 @@ import torch
 from matplotlib import pyplot as plt
 from consts import BATCH_SIZE, MAX_EPOCHS, NUM_WORKERS, LOG_STEPS, NUM_CLASSES
 
-def split_data(data: pd.DataFrame, parameters: Dict) -> Tuple:
-    """Splits data into features and targets training and test sets.
-
-    Args:
-        data: Data containing features and target.
-        parameters: Parameters defined in parameters/data_science.yml.
-    Returns:
-        Split data.
-    """
-    X = data[parameters["features"]]
-    y = data["price"]
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=parameters["test_size"], random_state=parameters["random_state"]
-    )
-    return X_train, X_test, y_train, y_test
-
 
 def train_model():
 
