@@ -40,6 +40,7 @@ jobs:
     - name: Run project
       run: |
         wandb login ${{ secrets.WANDB_API_KEY }}
+        kedro run --pipeline=downloading_data
         kedro run --pipeline=reporting
     - name: Test with pytest
       run: |
