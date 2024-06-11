@@ -28,7 +28,7 @@ def save_results(filepath,filename):
     Path(RESULTS_FOLDER).mkdir(parents=True, exist_ok=True)
     model=load_model(MODEL_CHECKPOINT)
     data=prepare_data([filepath])
-    results=run_inference(model,data)
+    results,IoU=run_inference(model,data)
     for res in results:
         plt.imsave(os.path.join(app.config['RESULTS_FOLDER'], filename),res)
     #result.save(os.path.join(app.config['RESULTS_FOLDER'], filename))
