@@ -10,4 +10,4 @@ LOG_STEPS = 5
 DOWNLOAD_DATASET = 1
 CITYSCAPES_PASSWORD = "Haslo44!"
 CITYSCAPES_USERNAME = "322178@uwr.edu.pl"
-DEMO_FOLDER = 'data/demo_results'
+DEMO_FOLDER= 'demo_results/dlprojekt/DL_segmenation/model-daeah9nu:best'
